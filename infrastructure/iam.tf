@@ -40,23 +40,23 @@ resource "aws_iam_policy" "permission_policy" {
         Resource = aws_dynamodb_table.contact_submissions.arn
       },
 
-      
-        {
-          Action = [
-            "sns:Publish",
-          ]
-          Effect   = "Allow"
-          Resource = aws_sns_topic.new_submission_notification.arn
-        },
-      
-      
-      #   {
-      #     Action = [
-      #       "ses:SendEmail",
-      #     ]
-      #     Effect   = "Allow"
-      #     Resource = aws_dynamodb_table.contact_submissions.arn
-      #   },
+
+      {
+        Action = [
+          "sns:Publish",
+        ]
+        Effect   = "Allow"
+        Resource = aws_sns_topic.new_submission_notification.arn
+      },
+
+
+      {
+        Action = [
+          "ses:SendEmail",
+        ]
+        Effect   = "Allow"
+        Resource = aws_ses_email_identity.ses_sender.arn
+      },
     ]
   })
 }
