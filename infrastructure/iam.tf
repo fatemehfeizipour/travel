@@ -57,6 +57,16 @@ resource "aws_iam_policy" "permission_policy" {
         Effect   = "Allow"
         Resource = aws_ses_email_identity.ses_sender.arn
       },
+
+      {
+        Action = [
+          "cloudwatch:CreateLogStream",
+          "cloudwatch:PutLogEvents",
+        ]
+        Effect   = "Allow"
+        Resource = aws_cloudwatch_log_group.log_group.arn
+      }
+
     ]
   })
 }
