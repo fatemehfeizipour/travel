@@ -60,12 +60,13 @@ resource "aws_iam_policy" "permission_policy" {
 
       {
         Action = [
-          "cloudwatch:CreateLogStream",
-          "cloudwatch:PutLogEvents",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
         ]
         Effect   = "Allow"
-        Resource = aws_cloudwatch_log_group.log_group.arn
-      }
+        Resource = "${aws_cloudwatch_log_group.log_group.arn}:*"
+      },
+
 
     ]
   })
