@@ -33,3 +33,16 @@ resource "aws_cloudwatch_metric_alarm" "contact_form_failures" {
   treat_missing_data  = "notBreaching"
   alarm_actions       = [aws_sns_topic.new_submission_notification.arn]
 }
+
+resource "aws_cloudwatch_log_metric_filter" "honeypot_triggers" {
+  name           = "contact-form-honeypot-triggers"
+  pattern        = "\"honeypot trigger\""
+  log_group_name = aws_cloudwatch_log_group.log_group.name
+
+  metric_transformation {
+    name          = "HoneypotTriggers"
+    namespace     = "TravelEase"
+    value         = "1"
+    default_value = "0"
+  }
+}
