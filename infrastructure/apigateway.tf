@@ -2,6 +2,12 @@ resource "aws_apigatewayv2_api" "travelease_api" {
   name          = "travelease-http-api"
   protocol_type = "HTTP"
 
+  cors_configuration {
+    allow_methods = ["POST"]
+    allow_headers = ["content-type"]
+    allow_origins = ["https://${aws_cloudfront_distribution.website.domain_name}"]
+  }
+
 }
 
 resource "aws_apigatewayv2_integration" "api_lambda_connection" {

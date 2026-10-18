@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelEase - Contact Us</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>Plan Your Next Adventure</h1>
+    <p class="subtitle">Tell us about your dream trip and we'll get back to you shortly.</p>
+
+    <form id="contactForm">
+
+      <div class="form-group">
+        <label for="name">Full Name *</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number *</label>
+        <input type="tel" id="phone" name="phone" required>
+      </div>
+
+      <div class="form-group">
+        <label for="message">Tell us about your trip *</label>
+        <textarea id="message" name="message" rows="4" required placeholder="Destination, dates, number of travelers, budget..."></textarea>
+      </div>
+
+      <!-- Honeypot field: hidden from real users, only bots tend to fill this in -->
+      <div class="honeypot-field" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <button type="submit" id="submitBtn">Send Inquiry</button>
+
+      <div id="formMessage" class="form-message"></div>
+
+    </form>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
