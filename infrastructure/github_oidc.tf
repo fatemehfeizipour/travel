@@ -19,7 +19,7 @@ resource "aws_iam_role" "github_actions" {
           StringLike = {
             "token.actions.githubusercontent.com:sub" = "repo:fatemehfeizipour/travelease-serverless-contact-form-rebuild:*"
           }
-        }        
+        }
       }
     ]
   })
