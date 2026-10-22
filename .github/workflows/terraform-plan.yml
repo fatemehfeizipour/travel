@@ -15,9 +15,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
-      - name: Show OIDC subject
-        run: |
-          python3 -c "import os,json,base64,urllib.request as u; r=u.Request(os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']+'&audience=sts.amazonaws.com',headers={'Authorization':'Bearer '+os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']}); t=json.load(u.urlopen(r))['value'].split('.')[1]; print(json.loads(base64.urlsafe_b64decode(t+'==='))['sub'])"
       - name: Log in to AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
