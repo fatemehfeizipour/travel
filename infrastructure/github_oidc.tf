@@ -39,7 +39,7 @@ resource "aws_iam_role_policy" "github_state_lock" {
     Statement = [
       {
         Effect   = "Allow"
-        Action   = [ "s3:PutObject" , "s3:DeleteObject"]
+        Action   = ["s3:PutObject", "s3:DeleteObject"]
         Resource = "arn:aws:s3:::travelease-contact-form-state/travelease/terraform.tfstate.tflock"
       }
     ]
