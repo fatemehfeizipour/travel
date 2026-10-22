@@ -17,7 +17,7 @@ resource "aws_iam_role" "github_actions" {
         }
         Condition = {
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:fatemehfeizipour/travelease-serverless-contact-form-rebuild:*"
+            "token.actions.githubusercontent.com:sub" = "repo:fatemehfeizipour@252370047/travelease-serverless-contact-form-rebuild@1423875969:*"
           }
         }
       }
@@ -28,4 +28,20 @@ resource "aws_iam_role" "github_actions" {
 resource "aws_iam_role_policy_attachment" "github_read_only" {
   role       = aws_iam_role.github_actions.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy" "github_state_lock" {
+  name = "state-lock"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:DeleteObject"]
+        Resource = "arn:aws:s3:::travelease-contact-form-state/travelease/terraform.tfstate.tflock"
+      }
+    ]
+  })
 }

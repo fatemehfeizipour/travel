@@ -1,0 +1,32 @@
+name : Terraform-Plan
+
+on:
+  pull_request:
+
+permissions: 
+  id-token: write
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Get the code
+        uses: actions/checkout@v4
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Log in to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::013928163139:role/travelease-github-actions-role
+          aws-region: ca-central-1
+      - name: Terraform init
+        run: terraform init
+        working-directory: infrastructure
+      - name: Terraform plan
+        run: terraform plan
+        working-directory: infrastructure
+        env:
+          TF_VAR_notification_email: ${{ secrets.TF_VAR_notification_email }}
+          TF_VAR_sender_ses: ${{ secrets.TF_VAR_sender_ses }}
+          TF_VAR_test_recipient: ${{ secrets.TF_VAR_test_recipient }}
