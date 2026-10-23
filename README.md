@@ -2,14 +2,31 @@
 
 A serverless contact form for a fictional travel company, built on AWS and managed entirely with Terraform. A visitor fills in a form on a static website. The message is validated, saved to a database, the business is notified, and the visitor gets a confirmation email. A GitHub Actions pipeline checks, plans and applies every infrastructure change.
 
-This is the second version of the project. I rebuilt it from scratch to understand every piece well enough to explain it. The first attempt lives in its own repository, and the main differences are:
+I built this over about 11 days, as a rebuild of an earlier version, so that I could explain every single piece of it in an interview. The first attempt lives in its own repository. What changed in this second version:
 
-- everything is written as code with Terraform instead of being clicked together in the console
+- everything is code (Terraform) instead of clicks in the console
 - the website sits behind CloudFront on a private S3 bucket instead of being served straight from S3
-- there is a CI/CD pipeline that logs in to AWS without stored access keys
+- a CI/CD pipeline logs in to AWS without stored access keys
 - failures and bot traffic are measured and alarmed
+- permissions are least privilege, down to separate roles for planning and applying
 
 **Region:** ca-central-1
+**More detail on the infrastructure code:** see [infrastructure/README.md](infrastructure/README.md)
+
+## Contents
+
+1. [Architecture](#architecture)
+2. [What happens when a visitor clicks Send](#what-happens-when-a-visitor-clicks-send)
+3. [Screenshots](#screenshots)
+4. [Design decisions](#design-decisions)
+5. [Monitoring](#monitoring)
+6. [SES sandbox](#ses-sandbox)
+7. [Terraform](#terraform)
+8. [CI/CD with GitHub Actions](#cicd-with-github-actions)
+9. [How the project came together](#how-the-project-came-together)
+10. [Problems I ran into and how I solved them](#problems-i-ran-into-and-how-i-solved-them)
+11. [Known limitations](#known-limitations)
+12. [Future plan](#future-plan)
 
 ## Architecture
 
@@ -28,6 +45,8 @@ flowchart LR
     ALARM --> SNS
 ```
 
+> **Screenshot placeholder:** a hand-drawn or draw.io version of this diagram, saved as `docs/screenshots/00-architecture.png`
+
 ## What happens when a visitor clicks Send
 
 1. The browser loads the page from CloudFront. The S3 bucket is private and only CloudFront can read it (origin access control).
@@ -37,6 +56,48 @@ flowchart LR
 5. If the hidden honeypot field is filled in, Lambda returns a fake success and writes and sends nothing.
 6. Lambda writes the submission to DynamoDB first. If that fails, nothing is sent and the visitor gets an error.
 7. If the write works, SNS notifies the business and SES emails the visitor. These two are independent, so one failing does not block the other.
+
+## Screenshots
+
+Replace each placeholder with the real image (`![description](docs/screenshots/file.png)`) once the screenshot is saved in `docs/screenshots/`.
+
+**The product**
+
+> **Screenshot placeholder:** the contact form on the CloudFront URL (`01-website-form.png`)
+>
+> **Screenshot placeholder:** the success message after sending (`02-success-message.png`)
+>
+> **Screenshot placeholder:** the validation error shown for a bad input (`03-validation-error.png`)
+
+**What the backend did with it**
+
+> **Screenshot placeholder:** the new item in the DynamoDB table (`04-dynamodb-item.png`)
+>
+> **Screenshot placeholder:** the SNS notification email the business receives (`05-sns-email.png`)
+>
+> **Screenshot placeholder:** the SES confirmation email the visitor receives (`06-ses-email.png`)
+>
+> **Screenshot placeholder:** Lambda log events in CloudWatch Logs (`07-cloudwatch-logs.png`)
+
+**Monitoring**
+
+> **Screenshot placeholder:** the failure alarm email, from the SES sandbox test (`08-alarm-email.png`)
+>
+> **Screenshot placeholder:** the HoneypotTriggers metric after the bot-style test (`09-honeypot-metric.png`)
+
+**Terraform and the pipeline**
+
+> **Screenshot placeholder:** `terraform plan` and `apply` output (`10-terraform-apply.png`)
+>
+> **Screenshot placeholder:** the state bucket with versioning on (`11-state-bucket.png`)
+>
+> **Screenshot placeholder:** the three workflows, all green, in the Actions tab (`12-actions-green.png`)
+>
+> **Screenshot placeholder:** the plan output on a pull request (`13-plan-on-pr.png`)
+>
+> **Screenshot placeholder:** the apply workflow running after a merge (`14-apply-on-merge.png`)
+>
+> **Screenshot placeholder:** the trust policy of the apply role, limited to the main branch (`15-apply-role-trust.png`)
 
 ## Design decisions
 
@@ -58,11 +119,11 @@ flowchart LR
 
 ## SES sandbox
 
-The project stays in the SES sandbox on purpose. Leaving the sandbox requires a verified domain, and I chose not to buy one for a learning project. In the sandbox, SES can only send to verified addresses, so a verified test recipient stands in for a customer. For real customers, the sandbox would have to be lifted.
+The project stays in the SES sandbox on purpose. Leaving the sandbox requires a verified domain, and I chose not to buy one for a learning project. In the sandbox, SES can only send to verified addresses, so a verified test recipient stands in for a customer. For real customers, the sandbox would have to be lifted (a domain with Route 53 and ACM is on the future plan below).
 
 ## Terraform
 
-All infrastructure is in the `infrastructure/` folder.
+All infrastructure is in the `infrastructure/` folder (see its own README for details).
 
 - **Remote state** in a separate S3 bucket (versioned, public access blocked), with S3 native locking (`use_lockfile`). The state bucket was created by hand, because Terraform cannot create the place where its own state is stored.
 - **Secrets stay out of git.** The notification email, SES sender and SES test recipient are variables, supplied locally through a git-ignored `terraform.tfvars` and in the pipeline through GitHub repository secrets.
@@ -82,9 +143,60 @@ To deploy it yourself, create `terraform.tfvars` with the three variables, then 
 - **Two roles on purpose.** A pull request runs the workflow file from the PR, so it must never hold write access.
 - **Apply role permissions** are one inline policy per service (state bucket, DynamoDB, Lambda, SNS, SES, CloudWatch, S3, API Gateway, CloudFront, IAM), limited to this project's own resources. IAM is limited to roles and policies named `travelease-*`. A few list and describe actions cannot be limited to one resource, so they are allowed on all resources and are read-only.
 - Changes to the apply role's own permissions are applied once from a laptop, because the role cannot grant itself permissions it does not yet have.
+- The merge is the approval: nothing reaches AWS unless a pull request was opened, its plan was read, and it was merged.
 
-## Known limitations and next steps
+## How the project came together
+
+About 11 days, built in this order:
+
+1. **Design first.** Decided the pieces and why (S3, API Gateway, Lambda, DynamoDB, SNS, SES), and worked through the questions I was unsure about: SNS vs SES vs SQS, CORS vs curl, WAF vs throttling.
+2. **Terraform foundation.** Provider, `init`, `plan`, `apply`, state, `.gitignore`, first commits.
+3. **Data and permissions.** DynamoDB table, the Lambda role (trust policy vs permissions policy), SNS topic and subscription, SES identities, CloudWatch log group.
+4. **Compute and API.** The Lambda function, tested in the console first, then the HTTP API (integration, route, stage, Lambda permission), tested with a real POST.
+5. **The website.** Private S3 bucket, CloudFront with origin access control, bucket policy, CORS built from the CloudFront domain.
+6. **Observability and protection.** Throttling, failure metric filter and alarm, honeypot metric filter.
+7. **CI/CD.** Check workflow, OIDC provider and role, remote state in S3, plan on pull requests, then a separate role and workflow for apply.
+8. **Documentation.** This README and the infrastructure README.
+
+## Problems I ran into and how I solved them
+
+- **Pipeline plan wanted to recreate everything.** The GitHub runner had no state file, because state was local. I moved state to an S3 backend with native locking.
+- **`AssumeRoleWithWebIdentity` not authorized.** The real OIDC subject includes the account and repository IDs, not just their names. I printed the token subject in a temporary debug step, found the real format, then fixed the trust policy condition and removed the debug step.
+- **The read-only plan role could not take the state lock.** Locking writes a small file to S3. I added a narrow policy for just that one lock file.
+- **False changes in the plan on the runner.** Windows line endings (CRLF) and the zip's file mode made hashes differ from Ubuntu's. Fixed with `.gitattributes` (LF) and a fixed file mode on the archive.
+- **Renaming an IAM policy forced a replacement.** A policy's ARN contains its name, so a rename replaces the policy and its attachment. I read the plan first and understood why before applying.
+- **First apply on `main` failed on access denied.** Some list and describe actions (CloudWatch Logs, SES) cannot be scoped to one resource. I added a small read-only policy for just those two actions.
+- **A green check is not proof.** Check only means formatting and syntax passed. The plan on a pull request is what shows whether AWS matches the code.
+
+## Known limitations
 
 - The apply role can attach policies to any `travelease-*` role, including itself. A condition on which policies it may attach would close that gap.
+- No custom domain yet, so the SES sandbox stays on and the site uses the default CloudFront URL.
+- No automated security scanning in the pipeline yet.
 - A budget alert and a few small clean-ups are still planned.
-- Optional: SQS with a dead-letter queue for email retries during traffic spikes.
+
+## Future plan
+
+This project is the base for a larger roadmap. The next steps, grouped by theme:
+
+**Security and quality in the pipeline**
+- Add **Checkov** to the GitHub Actions workflow, so insecure Terraform is caught before the plan.
+- Add **Cognito** for authentication and authorization.
+- Move sensitive values to **Secrets Manager**.
+
+**Domain and email**
+- **Route 53** for a custom domain and **ACM** for the HTTPS certificate, which also lets me verify a domain and request SES production access.
+
+**Developer experience**
+- A script for local execution (plan, apply and checks in one command).
+- **Ansible** for configuration tasks.
+
+**A containerised version of the platform**
+- **Docker** images, run on **ECS with Fargate** behind an **Application Load Balancer**, with a proper **VPC** (subnets, security groups) and a database on **RDS**.
+- **EKS** as a comparison to ECS.
+
+**Same stack, other tools**
+- Rebuild the infrastructure in **CloudFormation** and **CDK** to compare with Terraform.
+
+**Operations**
+- Extend **CloudWatch** monitoring and logging to the new components (dashboards, alarms on the load balancer and containers).
