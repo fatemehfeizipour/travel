@@ -2,13 +2,14 @@
 
 A serverless contact form for a fictional travel company, built on AWS and managed entirely with Terraform. A visitor fills in a form on a static website. The message is validated, saved to a database, the business is notified, and the visitor gets a confirmation email. A GitHub Actions pipeline checks, plans and applies every infrastructure change.
 
-This is the second iteration of the project, built over about 11 days. The first attempt was built mostly by hand in the console and lives in its own repository. This version rebuilds it as infrastructure as code with a deployment pipeline, and every design choice is documented below. What changed:
+This is the second iteration of the project, rebuilt from scratch over about 11 days. The first version, [travelease-contact](https://github.com/fatemehfeizipour/travelease-contact), was also built with Terraform and deployed from my laptop, with a few manual steps (installing packages, uploading the website files, setting the API URL). This version keeps Terraform and changes how the system is built, secured, deployed and monitored. What changed:
 
-- everything is code (Terraform) instead of clicks in the console
-- the website sits behind CloudFront on a private S3 bucket instead of being served straight from S3
-- a CI/CD pipeline logs in to AWS without stored access keys
-- failures and bot traffic are measured and alarmed
-- permissions are least privilege, down to separate roles for planning and applying
+- a CI/CD pipeline checks, plans and applies every change, and logs in to AWS without stored access keys
+- remote state in S3 with native locking, instead of state on one laptop
+- the website sits behind CloudFront on a private S3 bucket instead of being served straight from S3, and the website files are uploaded by Terraform
+- permissions are least privilege, with separate roles for planning and applying
+- SNS notifies the business and SES emails the visitor, as two independent steps
+- failures that the code catches and bot traffic are measured and alarmed with CloudWatch metric filters
 
 **Region:** ca-central-1
 **More detail on the infrastructure code:** see [infrastructure/README.md](infrastructure/README.md)
