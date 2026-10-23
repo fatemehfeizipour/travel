@@ -23,7 +23,7 @@ resource "aws_iam_role" "lambda_role" {
 
 
 resource "aws_iam_policy" "permission_policy" {
-  name        = "lambda_permission_policy"
+  name        = "travelease-lambda-permission-policy"
   path        = "/"
   description = "policy for lambda"
 
