@@ -310,3 +310,19 @@ resource "aws_iam_role_policy" "github_apply_iam_extra" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "github_apply_read_lookups" {
+  name = "apply-read-lookups"
+  role = aws_iam_role.github_apply.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["logs:DescribeLogGroups", "ses:GetIdentityVerificationAttributes"]
+        Resource = "*"
+      }
+    ]
+  })
+}
