@@ -55,14 +55,15 @@ flowchart LR
 [↑ Back to contents](#contents)
 
 1. The browser loads the page from CloudFront. The S3 bucket is private and only CloudFront can read it (origin access control).
-2. JavaScript stops the normal form submit and sends the fields as a POST request to the API. It shows a different message for 4xx (fix your input) and 5xx (something broke on our side) responses.
-3. The page comes from the CloudFront URL and the API lives on a different URL, so the browser treats them as two different origins. Before it sends the POST, the browser automatically sends a small preflight request (method `OPTIONS`) to API Gateway, asking whether this site is allowed to call the API. This is done by the browser itself, not by my JavaScript, and the POST is held back until the preflight is answered.
-4. API Gateway (HTTP API) answers the preflight with CORS headers. CORS is set so that only the CloudFront site is allowed. If the origin matches, the browser sends the real POST. If it does not match, the browser blocks the request and Lambda never runs.
+2. JavaScript stops the normal form submit and calls `fetch()` with the form fields as JSON in a POST request. This only hands the request to the browser. The browser decides what actually goes out on the network.
+3. The page comes from the CloudFront URL and the API lives on a different URL, so the browser treats them as two different origins. Because the request has a `Content-Type` of `application/json`, the browser holds the POST back and first sends a small preflight request (method `OPTIONS`) to API Gateway, asking whether this site is allowed to call the API. The browser does this by itself, not my JavaScript.
+4. API Gateway (HTTP API) answers the preflight with CORS headers. These say which website is allowed (only the CloudFront URL), which methods are allowed (`POST`), and which request headers are allowed (`Content-Type`). If the website matches, the browser sends the real POST. If it does not match, the browser blocks the request and Lambda never runs.
 5. API Gateway passes the real POST request to the Lambda function.
 6. Lambda validates the input again on the server side. It does not trust the browser.
 7. If the hidden honeypot field is filled in, Lambda returns a fake success and writes and sends nothing.
 8. Lambda writes the submission to DynamoDB first. If that fails, nothing is sent and the visitor gets an error.
 9. If the write works, SNS notifies the business and SES emails the visitor. These two are independent, so one failing does not block the other.
+10. When the response comes back, JavaScript checks the status. For a 4xx it shows a message to fix the input, and for a 5xx it shows that something broke on our side.
 
 ## Screenshots
 
