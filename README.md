@@ -11,6 +11,7 @@ This is the second iteration of the project, rebuilt from scratch over about 11 
 - SNS notifies the business and SES emails the visitor, as two independent steps
 - failures that the code catches and bot traffic are measured and alarmed with CloudWatch metric filters
 
+**Live demo:** [https://d3kd3o4si21v0c.cloudfront.net/](https://d3kd3o4si21v0c.cloudfront.net/)
 **Region:** ca-central-1
 **More detail on the infrastructure code:** see [infrastructure/README.md](infrastructure/README.md)
 
@@ -137,6 +138,8 @@ Replace each placeholder with the real image (`![description](docs/screenshots/f
 
 The project stays in the SES sandbox on purpose. Leaving the sandbox requires a verified domain, and I chose not to buy one for a learning project. In the sandbox, SES can only send to verified addresses, so a verified test recipient stands in for a customer. For real customers, the sandbox would have to be lifted (a domain with Route 53 and ACM is on the future plan below).
 
+**Why the confirmation email lands in spam.** The sender is a regular Gmail address that I verified in SES. When SES sends as a Gmail address, the email is not signed by gmail.com, so it fails the DMARC check and mailbox providers treat it as suspicious. Verifying a Gmail address is free and works for sandbox testing, but it is not a proper sender for real customers. The fix is a verified domain with Easy DKIM turned on, which is why the custom domain is on the future plan.
+
 ## Terraform
 
 [↑ Back to contents](#contents)
@@ -198,6 +201,7 @@ About 11 days, built in this order:
 
 - The apply role can attach policies to any `travelease-*` role, including itself. A condition on which policies it may attach would close that gap.
 - No custom domain yet, so the SES sandbox stays on and the site uses the default CloudFront URL.
+- The confirmation email is sent from a verified Gmail address, so it fails DMARC and goes to the spam folder. A verified domain with Easy DKIM would fix it.
 - No automated security scanning in the pipeline yet.
 - A budget alert and a few small clean-ups are still planned.
 
@@ -213,7 +217,7 @@ This project is the base for a larger roadmap. The next steps, grouped by theme:
 - Move sensitive values to **Secrets Manager**.
 
 **Domain and email**
-- **Route 53** for a custom domain and **ACM** for the HTTPS certificate, which also lets me verify a domain and request SES production access.
+- **Route 53** for a custom domain and **ACM** for the HTTPS certificate, which also lets me verify a domain, turn on **Easy DKIM** so the confirmation email passes DMARC and stops going to spam, and request SES production access.
 
 **Developer experience**
 - A script for local execution (plan, apply and checks in one command).
