@@ -2,7 +2,7 @@
 
 A serverless contact form for a fictional travel company, built on AWS and managed entirely with Terraform. A visitor fills in a form on a static website. The message is validated, saved to a database, the business is notified, and the visitor gets a confirmation email. A GitHub Actions pipeline checks, plans and applies every infrastructure change.
 
-I built this over about 11 days, as a rebuild of an earlier version, so that I could explain every single piece of it in an interview. The first attempt lives in its own repository. What changed in this second version:
+This is the second iteration of the project, built over about 11 days. The first attempt was built mostly by hand in the console and lives in its own repository. This version rebuilds it as infrastructure as code with a deployment pipeline, and every design choice is documented below. What changed:
 
 - everything is code (Terraform) instead of clicks in the console
 - the website sits behind CloudFront on a private S3 bucket instead of being served straight from S3
