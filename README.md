@@ -31,6 +31,8 @@ This is the second iteration of the project, rebuilt from scratch over about 11 
 
 ## Architecture
 
+[↑ Back to contents](#contents)
+
 ```mermaid
 flowchart LR
     V[Visitor browser] --> CF[CloudFront]
@@ -50,15 +52,21 @@ flowchart LR
 
 ## What happens when a visitor clicks Send
 
+[↑ Back to contents](#contents)
+
 1. The browser loads the page from CloudFront. The S3 bucket is private and only CloudFront can read it (origin access control).
-2. JavaScript stops the normal form submit, sends the fields as a POST request to the API, and shows a different message for 4xx (fix your input) and 5xx (something broke on our side) responses.
-3. API Gateway (HTTP API) passes the request to the Lambda function. CORS is set so that only the CloudFront site can call the API from a browser.
-4. Lambda validates the input again on the server side. It does not trust the browser.
-5. If the hidden honeypot field is filled in, Lambda returns a fake success and writes and sends nothing.
-6. Lambda writes the submission to DynamoDB first. If that fails, nothing is sent and the visitor gets an error.
-7. If the write works, SNS notifies the business and SES emails the visitor. These two are independent, so one failing does not block the other.
+2. JavaScript stops the normal form submit and sends the fields as a POST request to the API. It shows a different message for 4xx (fix your input) and 5xx (something broke on our side) responses.
+3. The page comes from the CloudFront URL and the API lives on a different URL, so the browser treats them as two different origins. Before it sends the POST, the browser automatically sends a small preflight request (method `OPTIONS`) to API Gateway, asking whether this site is allowed to call the API. This is done by the browser itself, not by my JavaScript, and the POST is held back until the preflight is answered.
+4. API Gateway (HTTP API) answers the preflight with CORS headers. CORS is set so that only the CloudFront site is allowed. If the origin matches, the browser sends the real POST. If it does not match, the browser blocks the request and Lambda never runs.
+5. API Gateway passes the real POST request to the Lambda function.
+6. Lambda validates the input again on the server side. It does not trust the browser.
+7. If the hidden honeypot field is filled in, Lambda returns a fake success and writes and sends nothing.
+8. Lambda writes the submission to DynamoDB first. If that fails, nothing is sent and the visitor gets an error.
+9. If the write works, SNS notifies the business and SES emails the visitor. These two are independent, so one failing does not block the other.
 
 ## Screenshots
+
+[↑ Back to contents](#contents)
 
 Replace each placeholder with the real image (`![description](docs/screenshots/file.png)`) once the screenshot is saved in `docs/screenshots/`.
 
@@ -102,6 +110,8 @@ Replace each placeholder with the real image (`![description](docs/screenshots/f
 
 ## Design decisions
 
+[↑ Back to contents](#contents)
+
 - **HTTP API instead of REST API.** Cheaper and simpler, and it is enough for one POST route.
 - **DynamoDB on-demand capacity.** Traffic is low and unpredictable, so there is nothing to size. Each submission gets a unique ID as the partition key.
 - **Private S3 bucket behind CloudFront.** All four block-public-access settings are on. The bucket policy only allows the one CloudFront distribution.
@@ -109,10 +119,12 @@ Replace each placeholder with the real image (`![description](docs/screenshots/f
 - **Honeypot field.** A field called `website` is hidden with CSS (not `type="hidden"`, which bots skip). Real visitors never fill it in. A metric filter counts how often it triggers.
 - **Throttling on the API stage** (rate 5, burst 10) to cap the overall request rate. It is not the same as a WAF, which blocks specific bad clients.
 - **Validation in both JavaScript and Lambda.** The JavaScript is for a good user experience. The Lambda check is the one that actually protects the system, because anyone can skip the browser and call the API directly.
-- **CORS protects visitors' browsers, not the API.** A tool like curl ignores it, which is why throttling and validation exist.
+- **CORS protects visitors' browsers, not the API.** It is a browser rule, enforced through the preflight request described above. A tool like curl ignores it, which is why throttling and validation exist.
 - **SQS is left out on purpose.** At this volume the form does not need a queue. For traffic spikes, the next step would be a queue and a second Lambda for sending emails, with a dead-letter queue.
 
 ## Monitoring
+
+[↑ Back to contents](#contents)
 
 - Lambda logs go to CloudWatch Logs with a 3-day retention.
 - A metric filter counts log lines containing "failed". An alarm on that metric notifies the SNS topic. This is needed because the code catches errors from SNS and SES and still returns success to the visitor, so Lambda's built-in error metric would not see them.
@@ -120,9 +132,13 @@ Replace each placeholder with the real image (`![description](docs/screenshots/f
 
 ## SES sandbox
 
+[↑ Back to contents](#contents)
+
 The project stays in the SES sandbox on purpose. Leaving the sandbox requires a verified domain, and I chose not to buy one for a learning project. In the sandbox, SES can only send to verified addresses, so a verified test recipient stands in for a customer. For real customers, the sandbox would have to be lifted (a domain with Route 53 and ACM is on the future plan below).
 
 ## Terraform
+
+[↑ Back to contents](#contents)
 
 All infrastructure is in the `infrastructure/` folder (see its own README for details).
 
@@ -133,6 +149,8 @@ All infrastructure is in the `infrastructure/` folder (see its own README for de
 To deploy it yourself, create `terraform.tfvars` with the three variables, then run `terraform init`, `terraform plan` and `terraform apply` from `infrastructure/`.
 
 ## CI/CD with GitHub Actions
+
+[↑ Back to contents](#contents)
 
 | Workflow | Trigger | What it does | Role |
 |---|---|---|---|
@@ -148,6 +166,8 @@ To deploy it yourself, create `terraform.tfvars` with the three variables, then 
 
 ## How the project came together
 
+[↑ Back to contents](#contents)
+
 About 11 days, built in this order:
 
 1. **Design first.** Decided the pieces and why (S3, API Gateway, Lambda, DynamoDB, SNS, SES), and worked through the questions I was unsure about: SNS vs SES vs SQS, CORS vs curl, WAF vs throttling.
@@ -161,6 +181,8 @@ About 11 days, built in this order:
 
 ## Problems I ran into and how I solved them
 
+[↑ Back to contents](#contents)
+
 - **Pipeline plan wanted to recreate everything.** The GitHub runner had no state file, because state was local. I moved state to an S3 backend with native locking.
 - **`AssumeRoleWithWebIdentity` not authorized.** The real OIDC subject includes the account and repository IDs, not just their names. I printed the token subject in a temporary debug step, found the real format, then fixed the trust policy condition and removed the debug step.
 - **The read-only plan role could not take the state lock.** Locking writes a small file to S3. I added a narrow policy for just that one lock file.
@@ -171,12 +193,16 @@ About 11 days, built in this order:
 
 ## Known limitations
 
+[↑ Back to contents](#contents)
+
 - The apply role can attach policies to any `travelease-*` role, including itself. A condition on which policies it may attach would close that gap.
 - No custom domain yet, so the SES sandbox stays on and the site uses the default CloudFront URL.
 - No automated security scanning in the pipeline yet.
 - A budget alert and a few small clean-ups are still planned.
 
 ## Future plan
+
+[↑ Back to contents](#contents)
 
 This project is the base for a larger roadmap. The next steps, grouped by theme:
 
