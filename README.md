@@ -2,7 +2,7 @@
 
 A serverless contact form for a fictional travel company, built on AWS and managed entirely with Terraform. A visitor fills in a form on a static website. The message is validated, saved to a database, the business is notified, and the visitor gets a confirmation email. A GitHub Actions pipeline checks, plans and applies every infrastructure change.
 
-This is the second iteration of the project, rebuilt from scratch over about 11 days. The first version, [travelease-contact](https://github.com/fatemehfeizipour/travelease-contact), was also built with Terraform and deployed from my laptop, with a few manual steps (installing packages, uploading the website files, setting the API URL). This version keeps Terraform and changes how the system is built, secured, deployed and monitored. What changed:
+This is the second iteration of the project, rebuilt from scratch over about 11 days. The first version, [travelease-contact](https://github.com/fatemehfeizipour/travelease-contact), was also built with Terraform and deployed from my laptop, with a few manual steps (uploading the website files). This version keeps Terraform and changes how the system is built, secured, deployed and monitored. What changed:
 
 - a CI/CD pipeline checks, plans and applies every change, and logs in to AWS without stored access keys
 - remote state in S3 with native locking, instead of state on one laptop
