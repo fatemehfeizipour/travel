@@ -1,6 +1,6 @@
 # Infrastructure (Terraform)
 
-This folder defines all of the AWS infrastructure for the TravelEase contact form. See the [main README](../README.md) for the project overview and architecture.
+This folder defines all of the AWS infrastructure for the TravelEase contact form. See the ![main README](../README.md) for the project overview and architecture.
 
 - **Tool:** Terraform 1.16.x with the AWS provider (v6.x)
 - **Region:** ca-central-1
