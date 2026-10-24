@@ -1,15 +1,30 @@
 # Infrastructure (Terraform)
 
-This folder defines all of the AWS infrastructure for the TravelEase contact form. See the [main README](README.md) for the project overview and architecture.
+This folder defines all of the AWS infrastructure for the TravelEase contact form. For the project overview, architecture diagram and the request flow, see the [main README](https://github.com/fatemehfeizipour/travelease-serverless-contact-form-rebuild/blob/main/README.md).
 
-- **Tool:** Terraform 1.16.x with the AWS provider (v6.x)
+- **Tool:** Terraform with the AWS provider (v6.x). Developed locally on 1.16, and the pipeline installs the latest release.
 - **Region:** ca-central-1
 - **State:** remote, in an S3 bucket with versioning and native locking
 - **Resources:** 31 managed resources and 1 data source, across 9 AWS services
 
 > **Screenshot placeholder:** the output of `terraform state list` (`docs/screenshots/16-state-list.png`)
 
+## Contents
+
+1. [Folder layout](#folder-layout)
+2. [What Terraform manages](#what-terraform-manages)
+3. [Variables and secrets](#variables-and-secrets)
+4. [State](#state)
+5. [IAM model](#iam-model)
+6. [Working with it locally](#working-with-it-locally)
+7. [How changes reach AWS](#how-changes-reach-aws)
+8. [Gotchas](#gotchas)
+9. [Cost](#cost)
+10. [Next for the infrastructure](#next-for-the-infrastructure)
+
 ## Folder layout
+
+[↑ Back to contents](#contents)
 
 The code is split by service, so each file answers one question.
 
@@ -20,13 +35,16 @@ The code is split by service, so each file answers one question.
 | `variables.tf` | Input variables (notification email, SES sender, SES test recipient) |
 | `dynamodb.tf` | The submissions table |
 | `iam.tf` | The Lambda execution role, its trust policy, and its permissions policy |
-| `lambda.tf` | The Lambda function, environment variables, zip packaging |
+| `lambda.tf` | The Lambda function and its environment variables |
+| `arcive.tf` | The `archive_file` data source that zips the Lambda code |
 | `cloudwatch.tf` | Log group, metric filters and the failure alarm |
 | `ses.tf` | The sender and test recipient email identities |
 | `github_oidc.tf` | The GitHub OIDC provider, the plan role and the apply role with their policies |
 | API Gateway, S3, CloudFront and SNS files | The HTTP API (integration, route, stage, Lambda permission), the private website bucket and its policy, the CloudFront distribution, and the SNS topic and subscription |
 
 ## What Terraform manages
+
+[↑ Back to contents](#contents)
 
 | Service | Resources |
 |---|---|
@@ -44,6 +62,8 @@ The `archive_file` data source zips the Lambda code on the machine running Terra
 
 ## Variables and secrets
 
+[↑ Back to contents](#contents)
+
 Three variables hold email addresses. They are never committed.
 
 | Variable | Used for |
@@ -57,12 +77,16 @@ Three variables hold email addresses. They are never committed.
 
 ## State
 
-- The state bucket is created by hand (console), because Terraform cannot create the place its own state lives.
+[↑ Back to contents](#contents)
+
+- The state bucket is created by hand in the console, because Terraform cannot create the place its own state lives.
 - Public access is blocked and versioning is on, so a bad write can be rolled back.
 - Locking uses S3 native locking (`use_lockfile`), which writes a small `.tflock` file next to the state. No DynamoDB lock table is needed.
 - Because state is remote, the laptop and the GitHub runner see the same picture of the infrastructure.
 
 ## IAM model
+
+[↑ Back to contents](#contents)
 
 | Role | Assumed by | Trust condition | Permissions |
 |---|---|---|---|
@@ -79,6 +103,8 @@ Three variables hold email addresses. They are never committed.
 
 ## Working with it locally
 
+[↑ Back to contents](#contents)
+
 From this folder:
 
 ```
@@ -89,9 +115,11 @@ terraform plan       # preview changes, read it before applying
 terraform apply      # make the changes
 ```
 
-Before applying, say what you expect the last line of the plan to be. A plan that surprises you is the point at which to stop.
+Before applying, decide what the last line of the plan should say. A plan that surprises you is the point at which to stop.
 
 ## How changes reach AWS
+
+[↑ Back to contents](#contents)
 
 1. Work on a new branch, never directly on `main`.
 2. Run `terraform fmt` and `terraform plan` locally.
@@ -103,17 +131,24 @@ Changes to the apply role's own permissions are the exception. The role cannot g
 
 ## Gotchas
 
+[↑ Back to contents](#contents)
+
 - **Renaming an IAM policy replaces it.** A policy's ARN contains its name, so a rename destroys and recreates the policy and the attachment pointing at it (`# forces replacement`). Briefly, the role has no permissions.
 - **Line endings.** Windows (CRLF) and the Linux runner (LF) hash files differently, which causes false changes in the plan. `.gitattributes` fixes line endings to LF.
 - **Lambda zip.** The archive uses a fixed file mode, so the hash is the same on every machine.
-- **Re-running a failed apply job.** It runs the old code from the commit, not the latest fix. Merge the fix instead.
+- **Re-running a failed apply job.** It runs the code from that run's commit, not the latest fix. Merge the fix instead.
+- **"Error acquiring the state lock" (HTTP 412).** Another run holds the lock, or a run that was cancelled or crashed left the `.tflock` file behind. Check the Actions tab for a running apply first. Only if nothing is running, remove the stale lock with `terraform force-unlock <lock ID>`. Do not use `-lock=false`, because it removes the protection.
 - **`terraform init` vs `git init`.** Easy to mix up. A nested `.git` folder was created once by mistake and removed.
 
 ## Cost
 
+[↑ Back to contents](#contents)
+
 Everything here is pay per use and very low volume (on-demand DynamoDB, Lambda, HTTP API, SNS, SES, CloudFront and a few small S3 objects). The state file is tiny, so S3 state storage costs a fraction of a cent. A budget alert is on the to-do list.
 
 ## Next for the infrastructure
+
+[↑ Back to contents](#contents)
 
 - Checkov scan in the pipeline
 - A condition limiting which policies the apply role may attach
