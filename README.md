@@ -11,11 +11,11 @@ This is the second iteration of the project, rebuilt from scratch over about 11 
 - SNS notifies the business and SES emails the visitor, as two independent steps
 - failures that the code catches and bot traffic are measured and alarmed with CloudWatch metric filters
 
-**Live demo:** [https://d3kd3o4si21v0c.cloudfront.net/](https://d3kd3o4si21v0c.cloudfront.net/)
+ [**Live demo:**](https://d3kd3o4si21v0c.cloudfront.net/)
 **Region:** ca-central-1
 **More detail on the infrastructure code:** see [infrastructure/README.md](infrastructure/README.md)
 
-**Medium Blog** [https://medium.com/@fatemehfeizipur/i-rebuilt-my-serverless-contact-form-from-scratch-in-11-days-heres-what-actually-broke-f5ec8a46ad64?sharedUserId=fatemehfeizipur](https://medium.com/@fatemehfeizipur/i-rebuilt-my-serverless-contact-form-from-scratch-in-11-days-heres-what-actually-broke-f5ec8a46ad64?sharedUserId=fatemehfeizipur)
+ [**Medium Blog**less-contact-form-from-scratch-in-11-days-heres-what-actually-broke-f5ec8a46ad64?sharedUserId=fatemehfeizipur](https://medium.com/@fatemehfeizipur/i-rebuilt-my-serverless-contact-form-from-scratch-in-11-days-heres-what-actually-broke-f5ec8a46ad64?sharedUserId=fatemehfeizipur)
 
 ## Contents
 
