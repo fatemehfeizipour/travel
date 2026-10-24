@@ -7,7 +7,7 @@ This folder defines all of the AWS infrastructure for the TravelEase contact for
 - **State:** remote, in an S3 bucket with versioning and native locking
 - **Resources:** 31 managed resources and 1 data source, across 9 AWS services
 
->  the output of `terraform state list` ![the output of `terraform state list`](../docs/160-state-list.png)![the output of `terraform state list`](../docs/161-state-list.png)
+>  **the output of `terraform state list`** ![the output of `terraform state list`](../docs/160-state-list.png)![the output of `terraform state list`](../docs/161-state-list.png)
 
 ## Contents
 
