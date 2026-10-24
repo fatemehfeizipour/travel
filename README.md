@@ -50,7 +50,7 @@ flowchart LR
     ALARM --> SNS
 ```
 
-> **Screenshot placeholder:** a hand-drawn or draw.io version of this diagram, saved as `docs/screenshots/00-architecture.png`
+> ![00-architecture.png](docs/screenshots/00-architecture.png) `docs/screenshots/00-architecture.png`
 
 ## What happens when a visitor clicks Send
 
