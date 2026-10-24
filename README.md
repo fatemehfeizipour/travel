@@ -50,7 +50,7 @@ flowchart LR
     ALARM --> SNS
 ```
 
-![00-architecture.png](docs/screenshots/00-architecture.png)
+![00-architecture.png](docs/screenshots/00_architecture.png)
 
 ## What happens when a visitor clicks Send
 
