@@ -23,12 +23,13 @@ This is the second iteration of the project, rebuilt from scratch over about 11 
 4. [Design decisions](#design-decisions)
 5. [Monitoring](#monitoring)
 6. [SES sandbox](#ses-sandbox)
-7. [Terraform](#terraform)
-8. [CI/CD with GitHub Actions](#cicd-with-github-actions)
-9. [How the project came together](#how-the-project-came-together)
-10. [Problems I ran into and how I solved them](#problems-i-ran-into-and-how-i-solved-them)
-11. [Known limitations](#known-limitations)
-12. [Future plan](#future-plan)
+7. [Cost](#cost)
+8. [Terraform](#terraform)
+9. [CI/CD with GitHub Actions](#cicd-with-github-actions)
+10. [How the project came together](#how-the-project-came-together)
+11. [Problems I ran into and how I solved them](#problems-i-ran-into-and-how-i-solved-them)
+12. [Known limitations](#known-limitations)
+13. [Future plan](#future-plan)
 
 ## Architecture
 
@@ -140,6 +141,22 @@ The project stays in the SES sandbox on purpose. Leaving the sandbox requires a 
 
 **Why the confirmation email lands in spam.** The sender is a regular Gmail address that I verified in SES. When SES sends as a Gmail address, the email is not signed by gmail.com, so it fails the DMARC check and mailbox providers treat it as suspicious. Verifying a Gmail address is free and works for sandbox testing, but it is not a proper sender for real customers. The fix is a verified domain with Easy DKIM turned on, which is why the custom domain is on the future plan.
 
+## Cost
+
+[↑ Back to contents](#contents)
+
+This project is designed to cost almost nothing. Every service is pay-as-you-go and the traffic is tiny. The numbers below are estimates from the AWS pricing pages (list prices, so ca-central-1 may differ slightly). The AWS Free Tier rules changed in July 2025, so which free offer applies depends on when the account was created.
+
+- **Lambda, SNS, CloudWatch and CloudFront** stay inside their always-free monthly allowances at this volume. For CloudWatch that is 10 custom metrics, 10 alarms and 5 GB of logs, and this project uses two metric filters and one alarm. The 3-day log retention keeps log storage small.
+- **DynamoDB** has 25 GB of always-free storage. On-demand capacity bills per request, so each submission costs a tiny amount.
+- **API Gateway (HTTP API)** costs about $1.00 per million requests. Older accounts also get 1 million free calls per month for the first 12 months.
+- **SES** costs $0.10 per 1,000 emails sent.
+- **The S3 buckets** hold a few small files.
+
+**Worst case.** The API stage is throttled at 5 requests per second. If someone sent that rate non-stop for a whole month, that would be about 13 million requests, which is roughly $13 for API Gateway, plus small Lambda and DynamoDB charges. Normal use is far below this.
+
+**Actual cost so far:** to be added after checking the Billing console (month-to-date total and the Free Tier usage page). A budget alert is still on the plan below.
+
 ## Terraform
 
 [↑ Back to contents](#contents)
@@ -218,6 +235,10 @@ This project is the base for a larger roadmap. The next steps, grouped by theme:
 
 **Domain and email**
 - **Route 53** for a custom domain and **ACM** for the HTTPS certificate, which also lets me verify a domain, turn on **Easy DKIM** so the confirmation email passes DMARC and stops going to spam, and request SES production access.
+
+**Reliability under traffic spikes**
+- Add an **SQS** queue and a **second Lambda** that sends the emails (SNS and SES), so the first Lambda only validates and saves the submission and the visitor gets a fast answer.
+- Add a **dead-letter queue** for emails that keep failing, so none are lost, and alarm on it.
 
 **Developer experience**
 - A script for local execution (plan, apply and checks in one command).
