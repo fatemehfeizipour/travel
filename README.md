@@ -75,9 +75,7 @@ flowchart LR
 **The product**
 
 >![description](docs/01-website-form.png)
-
 >the success message after sending ![description](docs/02-success-message.png)
-
 > the validation error shown for a bad input ![description](docs/03-validation-error.png)
 
 **What the backend did with it**
