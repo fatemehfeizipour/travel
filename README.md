@@ -71,15 +71,14 @@ flowchart LR
 
 [↑ Back to contents](#contents)
 
-Replace each placeholder with the real image (`![description](docs/screenshots/file.png)`) once the screenshot is saved in `docs/screenshots/`.
 
 **The product**
 
-![description](docs/01-website-form.png)
->
-the success message after sending ![description](docs/02-success-message.png)
->
->  the validation error shown for a bad input ![description](docs/03-validation-error.png)
+>![description](docs/01-website-form.png)
+
+>the success message after sending ![description](docs/02-success-message.png)
+
+> the validation error shown for a bad input ![description](docs/03-validation-error.png)
 
 **What the backend did with it**
 
