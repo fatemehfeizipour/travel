@@ -99,7 +99,7 @@ Three variables hold email addresses. They are never committed.
 - IAM actions in the apply role are limited to roles and policies named `travelease-*`, which is why every IAM resource in the project follows that naming rule.
 - A few list and describe actions (for example `logs:DescribeLogGroups` and `ses:GetIdentityVerificationAttributes`) cannot be limited to a resource, so they sit in one small read-only policy on all resources.
 
-> the apply role's inline policies in the IAM console ![the apply role's inline policies in the IAM console](docs/screenshots/17-apply-role-policies.png)
+> the apply role's inline policies in the IAM console ![the apply role's inline policies in the IAM console](../docs/17-apply-role-policies.png)
 
 ## Working with it locally
 
