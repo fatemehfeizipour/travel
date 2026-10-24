@@ -77,39 +77,39 @@ Replace each placeholder with the real image (`![description](docs/screenshots/f
 
 ![description](docs/01-website-form.png)
 >
-> **Screenshot placeholder:** the success message after sending (`02-success-message.png`)
+the success message after sending ![description](docs/02-success-message.png)
 >
-> **Screenshot placeholder:** the validation error shown for a bad input (`03-validation-error.png`)
+>  the validation error shown for a bad input ![description](docs/03-validation-error.png)
 
 **What the backend did with it**
 
-> **Screenshot placeholder:** the new item in the DynamoDB table (`04-dynamodb-item.png`)
+> the new item in the DynamoDB table ![description](docs/04-dynamodb-item.png)
 >
-> **Screenshot placeholder:** the SNS notification email the business receives (`05-sns-email.png`)
+> the SNS notification email the business receives ![description](docs/05-sns-email.png)
 >
-> **Screenshot placeholder:** the SES confirmation email the visitor receives (`06-ses-email.png`)
+> the SES confirmation email the visitor receives  ![description](docs/06-ses-email.png)
 >
-> **Screenshot placeholder:** Lambda log events in CloudWatch Logs (`07-cloudwatch-logs.png`)
+> Lambda log events in CloudWatch Logs ![description](docs/07-cloudwatch-logs.png)
 
 **Monitoring**
 
-> **Screenshot placeholder:** the failure alarm email, from the SES sandbox test (`08-alarm-email.png`)
+> the failure alarm email, from the SES sandbox test ![description](docs/08-alarm-email.png)
 >
-> **Screenshot placeholder:** the HoneypotTriggers metric after the bot-style test (`09-honeypot-metric.png`)
+> the HoneypotTriggers metric after the bot-style test ![description](docs/the HoneypotTriggers metric after the bot-style test ![description](docs/09-honeypot-metric.png)
 
 **Terraform and the pipeline**
 
-> **Screenshot placeholder:** `terraform plan` and `apply` output (`10-terraform-apply.png`)
+> `terraform plan` and `apply` output ![description](docs/10-terraform-apply.png)
 >
-> **Screenshot placeholder:** the state bucket with versioning on (`11-state-bucket.png`)
+>  the state bucket with versioning on ![description](docs/11-state-bucket.png)
 >
-> **Screenshot placeholder:** the three workflows, all green, in the Actions tab (`12-actions-green.png`)
+>  the three workflows, all green, in the Actions tab ![description](docs/12-actions-green.png)
 >
-> **Screenshot placeholder:** the plan output on a pull request (`13-plan-on-pr.png`)
+>  the plan output on a pull request ![description](docs/13-plan-on-pr.png)
 >
-> **Screenshot placeholder:** the apply workflow running after a merge (`14-apply-on-merge.png`)
+>  the apply workflow running after a merge ![description](docs/14-apply-on-merge.png)
 >
-> **Screenshot placeholder:** the trust policy of the apply role, limited to the main branch (`15-apply-role-trust.png`)
+>  the trust policy of the apply role, limited to the main branch ![description](docs/15-apply-role-trust.png)
 
 ## Design decisions
 
