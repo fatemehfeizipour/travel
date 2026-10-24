@@ -15,6 +15,8 @@ This is the second iteration of the project, rebuilt from scratch over about 11 
 **Region:** ca-central-1
 **More detail on the infrastructure code:** see [infrastructure/README.md](infrastructure/README.md)
 
+**Medium Blog** [https://medium.com/@fatemehfeizipur/i-rebuilt-my-serverless-contact-form-from-scratch-in-11-days-heres-what-actually-broke-f5ec8a46ad64?sharedUserId=fatemehfeizipur](https://medium.com/@fatemehfeizipur/i-rebuilt-my-serverless-contact-form-from-scratch-in-11-days-heres-what-actually-broke-f5ec8a46ad64?sharedUserId=fatemehfeizipur)
+
 ## Contents
 
 1. [Architecture](#architecture)
