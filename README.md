@@ -75,7 +75,7 @@ Replace each placeholder with the real image (`![description](docs/screenshots/f
 
 **The product**
 
-![description](docs/screenshots/01-website-form.png)
+![description](docs/01-website-form.png)
 >
 > **Screenshot placeholder:** the success message after sending (`02-success-message.png`)
 >
